@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: minutes
-
 pragma solidity ^0.6.0;
 
 import "@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
@@ -9,9 +8,13 @@ contract FundMe {
     address[] public founders;
 
     address public owner;
+    AggregatorV3Interface public priceFeed;
 
-    constructor() public {
+    //  0x9326BFA02ADD2366b30bacB125260Af641031331
+
+    constructor(address _priceFeed) public {
         owner = msg.sender;
+        priceFeed = AggregatorV3Interface(_priceFeed);
     }
 
     function fund() public payable {
@@ -44,25 +47,17 @@ contract FundMe {
     }
 
     function getVersion() public view returns (uint256) {
-        AggregatorV3Interface priceFeed = AggregatorV3Interface(
-            0x9326BFA02ADD2366b30bacB125260Af641031331
-        );
         return priceFeed.version();
     }
 
     // Return ETH price with 18 decimals (8 base + 10 added)
     function getPrice() public view returns (uint256) {
-        AggregatorV3Interface priceFeed = AggregatorV3Interface(
-            0x9326BFA02ADD2366b30bacB125260Af641031331
-        );
         (, int256 answer, , , ) = priceFeed.latestRoundData();
         return uint256(answer * (10**10));
     }
 
     function getDecimals() public view returns (uint8) {
-        return
-            AggregatorV3Interface(0x9326BFA02ADD2366b30bacB125260Af641031331)
-                .decimals();
+        return priceFeed.decimals();
     }
 
     // Gets the USD value of wei received in input
